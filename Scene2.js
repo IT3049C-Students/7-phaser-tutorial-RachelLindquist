@@ -28,12 +28,14 @@ class Scene2 extends Phaser.Scene{
 
         this.input.on('gameobjectdown', this.destroyShip, this);
 
+        this.physics.world.setBoundsCollision();
+
         let graphics = this.add.graphics();
         graphics.fillStyle(0x000000, 1);
         graphics.beginPath();
         graphics.moveTo(0, 0);
-        graphics.lineTo(config.width, 0);
-        graphics.lineTo(config.width, 20);
+        graphics.lineTo(this.game.config.width, 0);
+        graphics.lineTo(this.game.config.width, 20);
         graphics.lineTo(0, 20);
         graphics.lineTo(0, 0);
         graphics.closePath();
@@ -41,16 +43,16 @@ class Scene2 extends Phaser.Scene{
 
         this.score = 0;
 
-        this.scoreLabel = this.add.bitmapText(10,5, "pixelFont", "SCORE ", 16);
+        let scoreFormated = this.zeroPad(this.score, 6);
+        this.scoreLabel = this.add.bitmapText(10, 5, "pixelFont", "SCORE " + scoreFormated  , 16);
 
 
         this.powerUps = this.physics.add.group();
-
         let maxObjects = 4;
         for (let i = 0; i < maxObjects; i++){
             let powerUp = this.physics.add.sprite(16,16, "power-up");
             this.powerUps.add(powerUp);
-            powerUp.setRandomPosition(0, 0, game.config.width, game.config.height);
+            powerUp.setRandomPosition(0, 0, this.game.config.width, this.game.config.height);
 
             if (Math.random() > 0.5){
                 powerUp.play("red");
@@ -64,7 +66,7 @@ class Scene2 extends Phaser.Scene{
 
         }
 
-        this.player = this.physics.add.sprite(game.config.width / 2 - 8, game.config.height - 64, "player");
+        this.player = this.physics.add.sprite(this.game.config.width / 2 - 8, this.game.config.height - 64, "player");
         this.player.play("thrust");
         this.cursorKeys = this.input.keyboard.createCursorKeys();
         this.player.setCollideWorldBounds(true);
@@ -102,22 +104,22 @@ class Scene2 extends Phaser.Scene{
 
         this.time.addEvent({
             delay: 1000,
-            callback: this.resetPlayer,
+            callback: this.resetPlayer(player),
             callbackScore: this,
             loop: false
         })
     }
 
-    resetPlayer(){
-        let x = game.config.width / 2 - 8;
-        let y = game.config.height + 64;
-        this.player.enableBody(true, x, y, true, true);
+    resetPlayer(player){ //this.player doesnt work
+        let x = 256/ 2 - 8; // config not working again, just gonna hardcode
+        let y = 272 + 64;
+        player.enableBody(true, x, y, true, true);
 
-        this.player.alpha = 0.5;
+        player.alpha = 0.5;
 
         var tween = this.tweens.add({
-            targets: this.player,
-            y: config.height - 64,
+            targets: player,
+            y: 272 - 64,
             ease: 'Power1',
             duration: 1500,
             repeat:0,
@@ -135,6 +137,7 @@ class Scene2 extends Phaser.Scene{
         projectiles.destroy();
         this.resetShipPos(enemy);
         this.score += 15;
+
         let scoreFormated = this.zeroPad(this.score, 6);
         this.scoreLabel.text = "SCORE " + scoreFormated;
     }
@@ -147,7 +150,7 @@ class Scene2 extends Phaser.Scene{
     }
 
     zeroPad(number, size){
-        var stringNumber = String(number);
+        let stringNumber = String(number);
         while(stringNumber.length < (size || 2)){
           stringNumber = "0" + stringNumber;
         }
@@ -164,7 +167,7 @@ class Scene2 extends Phaser.Scene{
         this.movePlayerManager();
 
         if(Phaser.Input.Keyboard.JustDown(this.spacebar)){
-            if (thiis.player.active){
+            if (this.player.active){
                 this.shootBeam();
             }
         }
@@ -173,23 +176,29 @@ class Scene2 extends Phaser.Scene{
             let beam = this.projectiles.getChildren()[i];
             beam.update();
         }
+    }
 
-        if(this.cursorKeys.left.isDown){
-            this.player.setVelocityX(-gameSettings.playerSpeed);
-        } else if (this.cursorKeys.right.isDown){
-            this.player.setVelocityX(gamesSettings.playerSpeed);
+
+    movePlayerManager() {
+
+        this.player.setVelocity(0);
+        let playerSpeed = 200;
+        if (this.cursorKeys.left.isDown) {
+            this.player.setVelocityX(-playerSpeed);
+        } else if (this.cursorKeys.right.isDown) {
+            this.player.setVelocityX(playerSpeed);
         }
 
-        if (this.cursorKeys.up.isDown){
-            this.player.setVelocityY(-gameSettings.playerSpeed);
-        } else if (this.cursorKeys.down.isDown){
-            this.player.setVelocityY(gamesSettings.playerSpeed);
+        if (this.cursorKeys.up.isDown) {
+            this.player.setVelocityY(-playerSpeed);
+        } else if (this.cursorKeys.down.isDown) {
+            this.player.setVelocityY(playerSpeed);
         }
     }
 
     resetShipPos(ship){
         ship.y = 0;
-        let randomX = Phaser.Math.Between(0, this.game.config.width);
+        let randomX = Phaser.Math.Between(0, 256); //config.width didnt work, just hard coding
         ship.x = randomX;
     }
 
@@ -200,5 +209,6 @@ class Scene2 extends Phaser.Scene{
 
     shootBeam(){
         let beam = new Beam(this);
+        this.projectiles.add(beam); // not in tutorial but cant destroy ships without
     }
 }

@@ -4,7 +4,7 @@ class Scene1 extends Phaser.Scene{
     }
 
     preload(){
-        this.load.image("background", "assets/images/background.png");
+        this.load.image("background", "./assets/images/background.png");
 
         //this.load.image("ship", "assets/images/ship.png")
         //this.load.image("ship2", "assets/images/ship2.png")
@@ -40,12 +40,12 @@ class Scene1 extends Phaser.Scene{
             frameHeight: 24
         });
 
-        this.load.spritesheet("beam", "assets/spritesheets/beam.png", {
+        this.load.spritesheet("beam", "./assets/spritesheets/beam.png", {
             frameWidth: 16,
             frameHeight: 16
         });
 
-        this.load.bitmapFont("pixelFont", "assets/font/font/font.png", "assets/font/font.xml");
+        this.load.bitmapFont("pixelFont", "./assets/font/font.png", "./assets/font/font.xml");
 
     }   
 
@@ -112,7 +112,7 @@ class Scene1 extends Phaser.Scene{
 
         this.anims.create({
             key: "beam_anim",
-            frames: this.animes.generateFrameNumbers("beam"),
+            frames: this.anims.generateFrameNumbers("beam"),
             frameRate: 20,
             repeat: -1
         });
